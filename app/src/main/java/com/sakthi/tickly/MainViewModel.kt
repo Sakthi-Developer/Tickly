@@ -1,10 +1,6 @@
 package com.sakthi.tickly
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -37,16 +33,25 @@ class MainViewModel(
     val isTimerStarted: StateFlow<Boolean> = _isTimerStarted.asStateFlow()
 
 
-
     init {
         viewModelScope.launch {
-
-            dataStoreManager.readDurations().collect {
-                _timerMode.value = it
+            dataStoreManager.readDurations().collect { durations ->
+                if (durations.isEmpty()) {
+                    // Default durations
+                    dataStoreManager.saveDuration(TimerMode.Pomodoro, 25)
+                    dataStoreManager.saveDuration(TimerMode.ShortBreak, 5)
+                    dataStoreManager.saveDuration(TimerMode.LongBreak, 15)
+                } else {
+                    _timerMode.value = durations
+                    // Set initial timer value based on selected mode
+                    val initialDuration = durations[_selectedTimerMode.value] ?: 25
+                    _timerValue.value = initialDuration * 60 // assuming seconds
+                }
+                Log.d("MainViewModel", "Initialized timerMode: ${timerMode.value}")
             }
         }
-        setSelectedTimerMode(TimerMode.Pomodoro)
     }
+
 
     fun setSelectedTimerMode(mode: TimerMode) {
         _selectedTimerMode.value = mode

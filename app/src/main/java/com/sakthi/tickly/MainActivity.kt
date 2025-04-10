@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,10 +42,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.sakthi.tickly.ui.theme.TicklyTheme
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.Locale
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "timer_preferences")
@@ -55,7 +59,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel = MainViewModel(DataStoreManager(this))
+        val viewModel = getViewModel<MainViewModel>()
+
         enableEdgeToEdge()
         setContent {
 
@@ -67,6 +72,8 @@ class MainActivity : ComponentActivity() {
 
 
                     Box {
+
+                        var isPopupVisible by remember { mutableStateOf(false) }
 
                         Image(
                             painter = painterResource(id = R.drawable.bg),
@@ -151,15 +158,85 @@ class MainActivity : ComponentActivity() {
                                             viewModel.restartTimer()
                                         }
                                 )
+
+                                Spacer(
+                                    modifier = Modifier.size(16.dp)
+                                )
+
+
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_settings_24),
+                                    contentDescription = "Settings",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .size(35.dp)
+                                        .clickable {
+                                            isPopupVisible = true
+                                        }
+                                )
+
                             }
 
                         }
+
+                        if (isPopupVisible) {
+                            MyCustomDialog(
+                                onDismissRequest = { isPopupVisible = false },
+                                properties = DialogProperties(
+                                    dismissOnBackPress = true,
+                                    dismissOnClickOutside = true
+                                )
+                            ) {
+
+                                SettingsScreen(
+                                    viewModel = viewModel,
+                                    closeDialog = {
+                                        isPopupVisible = false
+                                    }
+                                )
+                            }
+
+                        }
+
+
                     }
                 }
             }
         }
     }
 }
+
+
+@Composable
+fun MyCustomDialog(
+    onDismissRequest: () -> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content: @Composable () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        // We are copying the passed properties
+        // then setting usePlatformDefaultWidth to false
+        properties = properties.let {
+            DialogProperties(
+                dismissOnBackPress = it.dismissOnBackPress,
+                dismissOnClickOutside = it.dismissOnClickOutside,
+                securePolicy = it.securePolicy,
+                usePlatformDefaultWidth = false
+            )
+        },
+        content = {
+            Surface(
+                color = Color.Transparent,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                content = content
+            )
+        }
+    )
+}
+
 
 @Composable
 fun OptionsSelector(viewModel: MainViewModel) {

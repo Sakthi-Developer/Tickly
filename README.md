@@ -53,7 +53,7 @@ Connect your Android device or start an emulator.
 
 Click Run ▶️ to build and launch the app.
 
-### 🛠️ Tech Stack
+## 🛠️ Tech Stack
 Kotlin
 
 Jetpack Compose
@@ -62,9 +62,9 @@ Android Architecture Components
 
 Coroutines & Flow
 
-### 🤝 Contributing
+## 🤝 Contributing
 Contributions are welcome!
 If you have suggestions or want to improve Tickly, feel free to fork the repo and submit a pull request.
 
-### 📄 License
+## 📄 License
 This project is licensed under the MIT License — see the LICENSE file for details.

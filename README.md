@@ -37,7 +37,7 @@
 
 ### Prerequisites
 
-- Android Studio **Electric Eel** or higher
+- Current stable version of Android Studio
 - Android device or emulator (**API 21+**)
 
 ### Clone the Repository
